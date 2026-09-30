@@ -17,9 +17,9 @@ namespace {
    dsp::DitherType switchToDitherType(int32_t position) {
       
       switch(position) {
-         case 0: return dsp:DitherType::Triangular;
-         case 1: return dsp:DitherType::Rectangular;
-         default: return dsp:DitherType::None; 
+         case 0: return dsp::DitherType::Triangular;
+         case 1: return dsp::DitherType::Rectangular;
+         default: return dsp::DitherType::None; 
        } 
     }
 }
@@ -43,7 +43,7 @@ void EffectProcessor::setKnob(uint32_t index, float value) {
 
 void EffectProcessor::setSwitch(uint32_t index, int32_t position) {
     if (index == 0) {
-       ditherType_store(switchToDitherType(position), std::memory_order_relaxed);
+       ditherType_.store(switchToDitherType(position), std::memory_order_relaxed);
     }
 }
 

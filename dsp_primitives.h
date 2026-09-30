@@ -3,7 +3,7 @@
 
 namespace dsp {
 
-  float lbsStep(int bitDepth);
+  float lsbStep(int bitDepth);
   float quantize(float x, int bitDepth);
   
   class NoiseSource {
@@ -12,7 +12,7 @@ namespace dsp {
       float nextUniform();
      
      private:
-       uint32_t state_;)
+       uint32_t state_;
     
     };
   
@@ -29,6 +29,6 @@ namespace dsp {
       
     private:
       NoiseSource noise_;
-    }
+    };
 
 } // namespace dsp

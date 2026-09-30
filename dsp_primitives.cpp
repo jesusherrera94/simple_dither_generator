@@ -2,7 +2,7 @@
 #include <cmath>
 
 
-float dsp::lbsStep(int bitDepth) {
+float dsp::lsbStep(int bitDepth) {
    
    return 2.0f / static_cast<float>((1 << bitDepth) - 1);
   
@@ -11,7 +11,7 @@ float dsp::lbsStep(int bitDepth) {
  
  float dsp::quantize(float x, int bitDepth) {
    
-   const float step = lbsStep(bitDepth);
+   const float step = lsbStep(bitDepth);
    
    const float snapped = std::round(x / step) * step;
    
@@ -41,12 +41,10 @@ float dsp::DitherGenerator::process(DitherType type, float step) {
       case DitherType::Triangular:
           return (noise_.nextUniform() - noise_.nextUniform()) * step;
           
-      case DitherType::None:
-      
+      case DitherType::None: 
       default:
         return 0.0f;
      } 
   
  }
   
-  )

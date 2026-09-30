@@ -8,9 +8,9 @@ class EffectProcessor {
 public:
     explicit EffectProcessor(float sampleRate);
     void setKnob(uint32_t index, float value);
-    void setWitch(uint32_t index, int32_t position);
-    void setDitherEnable(bool enabled);
-    void processSample(float input);
+    void setSwitch(uint32_t index, int32_t position);
+    void setDitherEnabled(bool enabled);
+    float processSample(float input);
     
 private:
     static constexpr int kMaxBitDepth = 16;
