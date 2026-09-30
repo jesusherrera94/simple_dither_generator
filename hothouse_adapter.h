@@ -31,4 +31,9 @@ private:
     // Shared between the control loop (writer) and audio callback (reader).
     static std::atomic<bool> bypassed_;
     daisy::Led led_bypass_;
+    daisy::Led led_dither_;
+
+    // Latched state for the momentary FOOTSWITCH_1. Touched only by the control
+    // loop; the DSP keeps its own atomic copy, so this needs no synchronization.
+    bool ditherEnabled_ = false;
 };

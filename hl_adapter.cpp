@@ -36,11 +36,17 @@ void hl_set_switch(void* plugin, uint32_t index, int32_t position) /* 0=UP 1=MID
 }
 
 void hl_set_footswitch(void* plugin, uint32_t index, bool pressed) {
-    // Documented no-op: bypass is handled by HeadroomLab. Add behavior here if
-    // you want the footswitches to drive your effect in the simulator.
-    (void)plugin;
-    (void)index;
-    (void)pressed;
+    // Footswitch 1 is the dither A/B.
+    //
+    // Unlike the hardware, HeadroomLab's footswitch is a latching toggle: it
+    // reports the new ON/OFF state rather than a momentary press, so we mirror it
+    // straight in and do no edge detection of our own (compare with
+    // HothouseAdapter, which has to latch the momentary switch itself).
+    //
+    // Footswitch 2 is ignored: bypass is HeadroomLab's job.
+    if (index == 0) {
+        static_cast<EffectProcessor*>(plugin)->setDitherEnabled(pressed);
+    }
 }
 
 } // extern "C"

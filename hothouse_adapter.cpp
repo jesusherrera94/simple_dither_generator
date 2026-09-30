@@ -11,6 +11,8 @@ HothouseAdapter::HothouseAdapter(Hothouse& hw, EffectProcessor& dsp)
     // Bind the instance for the static audio callback.
     audioDsp_ = &dsp;
     led_bypass_.Init(hw.seed.GetPin(Hothouse::LED_2), false);
+    led_dither_.Init(hw.seed.GetPin(Hothouse::LED_1), false);
+    dsp_.setDitherEnabled(ditherEnabled_);
 }
 
 void HothouseAdapter::updateControls() {
@@ -23,21 +25,31 @@ void HothouseAdapter::updateControls() {
                         std::memory_order_relaxed);
     }
 
-    // Map all 6 knobs (0..1) and 3 toggles (0=UP 1=MID 2=DOWN) into the DSP.
-    dsp_.setKnob(0, hw_.GetKnobValue(Hothouse::KNOB_1));
-    dsp_.setKnob(1, hw_.GetKnobValue(Hothouse::KNOB_2));
-    dsp_.setKnob(2, hw_.GetKnobValue(Hothouse::KNOB_3));
-    dsp_.setKnob(3, hw_.GetKnobValue(Hothouse::KNOB_4));
-    dsp_.setKnob(4, hw_.GetKnobValue(Hothouse::KNOB_5));
-    dsp_.setKnob(5, hw_.GetKnobValue(Hothouse::KNOB_6));
+    // Toggle the dither A/B when FOOTSWITCH_1 is tapped. The hardware switch is
+    // momentary, so we latch it ourselves here.
+    //
+    // FOOTSWITCH_1 is also the DFU hold (see CheckResetToBootloader), which means
+    // entering the bootloader will flip the dither state once on the way in.
+    // Harmless, and this dual use is the normal Hothouse convention.
+    if (hw_.switches[Hothouse::FOOTSWITCH_1].RisingEdge()) {
+        ditherEnabled_ = !ditherEnabled_;
+        dsp_.setDitherEnabled(ditherEnabled_);
+    }
 
+    // Only the controls this effect actually uses are mapped; the remaining
+    // knobs and toggles are left unwired on purpose.
+    dsp_.setKnob(0, hw_.GetKnobValue(Hothouse::KNOB_1));  // output volume
+    dsp_.setKnob(1, hw_.GetKnobValue(Hothouse::KNOB_2));  // target bit depth
+
+    // TOGGLESWITCH_1 picks the dither distribution (UP=TPDF, MID=RPDF, DOWN=off).
+    // Its UP/MIDDLE/DOWN values are already 0/1/2, which is what setSwitch wants.
     dsp_.setSwitch(0, hw_.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_1));
-    dsp_.setSwitch(1, hw_.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_2));
-    dsp_.setSwitch(2, hw_.GetToggleswitchPosition(Hothouse::TOGGLESWITCH_3));
 
-    // Update bypass LED state.
+    // Update LED state.
     led_bypass_.Set(bypassed_.load(std::memory_order_relaxed) ? 0.0f : 1.0f);
     led_bypass_.Update();
+    led_dither_.Set(ditherEnabled_ ? 1.0f : 0.0f);
+    led_dither_.Update();
 }
 
 void HothouseAdapter::AudioCallback(AudioHandle::InputBuffer in,
