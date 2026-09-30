@@ -36,11 +36,9 @@ void hl_set_switch(void* plugin, uint32_t index, int32_t position) /* 0=UP 1=MID
 }
 
 void hl_set_footswitch(void* plugin, uint32_t index, bool pressed) {
-    // Documented no-op: bypass is handled by HeadroomLab. Add behavior here if
-    // you want the footswitches to drive your effect in the simulator.
-    (void)plugin;
-    (void)index;
-    (void)pressed;
+    if (index==0){
+       static_cast<EffectProcessor*>(plugin)->setDitherEnabled(pressed); 
+     }
 }
 
 } // extern "C"
